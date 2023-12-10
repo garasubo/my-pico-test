@@ -7,6 +7,9 @@ MEMORY
   RAM : ORIGIN = 0x20000000, LENGTH = 256K
 }
 
+EXTERN(Reset);
+ENTRY(Reset);
+
 SECTIONS {
 
   /* ### Boot loader */
@@ -22,6 +25,8 @@ SECTIONS {
 
     /* Second entry: reset vector */
     KEEP(*(.vector_table.reset_vector));
+
+    KEEP(*(.vector_table.exceptions));
   } > FLASH
 
   .text :
@@ -29,9 +34,42 @@ SECTIONS {
     *(.text .text.*);
   } > FLASH
 
+  .rodata : ALIGN(4) {
+    . = ALIGN(4);
+    *(.rodata .rodata.*);
+    . = ALIGN(4);
+  } > FLASH
+
+  .bss (NOLOAD) : ALIGN(4) {
+    . = ALIGN(4);
+    _sbss = .;
+    *(.bss .bss.*);
+    . = ALIGN(4);
+    _ebss = .;
+  } > RAM
+
+  .data : ALIGN(4)
+  {
+    . = ALIGN(4);
+    _sdata = .;
+    *(.data .data.*);
+    . = ALIGN(4);
+    _edata = .;
+  } > RAM AT> FLASH
+
+  _sidata = LOADADDR(.data);
+
   /DISCARD/ :
   {
     *(.ARM.exidx .ARM.exidx.*);
   }
-
 }
+
+PROVIDE(NMI = DefaultExceptionHandler);
+PROVIDE(HardFault = DefaultExceptionHandler);
+PROVIDE(MemManage = DefaultExceptionHandler);
+PROVIDE(BusFault = DefaultExceptionHandler);
+PROVIDE(UsageFault = DefaultExceptionHandler);
+PROVIDE(SVCall = DefaultExceptionHandler);
+PROVIDE(PendSV = DefaultExceptionHandler);
+PROVIDE(SysTick = DefaultExceptionHandler);
