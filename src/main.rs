@@ -2,6 +2,7 @@
 #![no_main]
 
 mod gpio;
+mod systick;
 
 use core::{panic::PanicInfo, ptr};
 use crate::gpio::Gpio;
@@ -90,6 +91,15 @@ pub fn my_main() -> ! {
     gpio.wait_gpio_reset_done();
     gpio.set_output_enable(6);
     gpio.set_high(6);
+
+    systick::init(1000 * 1000);
+    loop {
+        while !systick::check_counted() {}
+        gpio.set_low(6);
+        while !systick::check_counted() {}
+        gpio.set_high(6);
+    }
+
 
     loop {}
 }

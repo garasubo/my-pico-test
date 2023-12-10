@@ -8,6 +8,8 @@ struct SioRegisters {
     cpuid: RO<u32>,
     gpio_in: RO<u32>,
     gpio_hi_in: RO<u32>,
+    _reserved0: u32,
+    // 0x10
     gpio_out: RW<u32>,
     gpio_out_set: WO<u32>,
     gpio_out_clr: WO<u32>,
