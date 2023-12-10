@@ -2,23 +2,6 @@
 #![no_main]
 
 use core::{panic::PanicInfo, ptr};
-use critical_section::{RawRestoreState, set_impl};
-
-struct DummyCriticalSection;
-
-unsafe impl critical_section::Impl for DummyCriticalSection {
-    unsafe fn acquire() -> RawRestoreState {
-        ()
-    }
-
-    unsafe fn release(_restore_state: RawRestoreState) {
-    }
-}
-
-set_impl!(DummyCriticalSection);
-
-use defmt::info;
-use defmt_rtt as _;
 
 #[link_section = ".boot_loader"]
 #[used]
@@ -96,19 +79,10 @@ pub unsafe extern "C" fn Reset() -> ! {
     ptr::copy_nonoverlapping(sidata, sdata, count);
 
 
-    const SIO_BASE: u32 = 0xd0000000;
-    const SPINLOCK0_PTR: *mut u32 = (SIO_BASE + 0x100) as *mut u32;
-    const SPINLOCK_COUNT: usize = 32;
-    for i in 0..SPINLOCK_COUNT {
-        SPINLOCK0_PTR.wrapping_add(i).write_volatile(1);
-    }
-
     my_main()
 }
 
-#[export_name = "main"]
-pub unsafe extern "C" fn my_main() -> ! {
-    info!("Hello, world!");
+pub fn my_main() -> ! {
     loop {}
 }
 
