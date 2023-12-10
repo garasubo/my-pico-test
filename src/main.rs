@@ -1,7 +1,10 @@
 #![no_std]
 #![no_main]
 
+mod gpio;
+
 use core::{panic::PanicInfo, ptr};
+use crate::gpio::Gpio;
 
 #[link_section = ".boot_loader"]
 #[used]
@@ -83,6 +86,11 @@ pub unsafe extern "C" fn Reset() -> ! {
 }
 
 pub fn my_main() -> ! {
+    let gpio = Gpio::new();
+    gpio.wait_gpio_reset_done();
+    gpio.set_output_enable(6);
+    gpio.set_high(6);
+
     loop {}
 }
 

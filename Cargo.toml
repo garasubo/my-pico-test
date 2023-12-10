@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rp2040-boot2 = "0.3.0"
+volatile-register = "0.2.2"
