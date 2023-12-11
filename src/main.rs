@@ -3,16 +3,19 @@
 
 mod gpio;
 mod systick;
+mod cs;
 
-use core::{panic::PanicInfo, ptr};
+use core::ptr;
+use defmt_rtt as _; // global logger
+use panic_probe as _;
 use crate::gpio::Gpio;
 
 #[link_section = ".boot_loader"]
 #[used]
 pub static BOOT_LOADER: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+#[defmt::panic_handler]
+fn panic() -> ! {
     loop {}
 }
 
@@ -76,10 +79,10 @@ pub unsafe extern "C" fn Reset() -> ! {
     let edata = &mut _edata as *mut u8;
     let sidata = &_sidata as *const u8;
 
-    let count = &ebss as *const _ as usize - &sbss as *const _ as usize;
+    let count = ebss as usize - sbss as usize;
     ptr::write_bytes(sbss, 0, count);
 
-    let count = &edata as *const _ as usize - &sdata as *const _ as usize;
+    let count = edata as usize - sdata as usize;
     ptr::copy_nonoverlapping(sidata, sdata, count);
 
 
@@ -91,6 +94,8 @@ pub fn my_main() -> ! {
     gpio.wait_gpio_reset_done();
     gpio.set_output_enable(6);
     gpio.set_high(6);
+
+    defmt::println!("hello");
 
     systick::init(1000 * 1000);
     loop {
