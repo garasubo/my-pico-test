@@ -76,10 +76,10 @@ pub unsafe extern "C" fn Reset() -> ! {
     let edata = &mut _edata as *mut u8;
     let sidata = &_sidata as *const u8;
 
-    let count = &ebss as *const _ as usize - &sbss as *const _ as usize;
+    let count = ebss as usize - sbss as usize;
     ptr::write_bytes(sbss, 0, count);
 
-    let count = &edata as *const _ as usize - &sdata as *const _ as usize;
+    let count = edata as usize - sdata as usize;
     ptr::copy_nonoverlapping(sidata, sdata, count);
 
 
@@ -99,8 +99,4 @@ pub fn my_main() -> ! {
         while !systick::check_counted() {}
         gpio.set_high(6);
     }
-
-
-    loop {}
 }
-
