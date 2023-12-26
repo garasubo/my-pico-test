@@ -4,18 +4,21 @@
 mod gpio;
 mod systick;
 mod cs;
+mod uart;
+mod clock;
 
+use core::panic::PanicInfo;
 use core::ptr;
-use defmt_rtt as _; // global logger
-use panic_probe as _;
+//use defmt_rtt as _; // global logger
+//use panic_probe as _;
 use crate::gpio::Gpio;
 
 #[link_section = ".boot_loader"]
 #[used]
 pub static BOOT_LOADER: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
 
-#[defmt::panic_handler]
-fn panic() -> ! {
+#[panic_handler]
+fn panic(_: &PanicInfo) -> ! {
     loop {}
 }
 
@@ -95,17 +98,17 @@ pub fn my_main() -> ! {
     gpio.set_output_enable(6);
     gpio.set_high(6);
 
-    defmt::println!("hello");
+    //defmt::println!("hello");
+    let xosc = clock::Xosc::new();
+    let uart = uart::Uart0::new();
+    uart.init(&xosc, &gpio);
 
     systick::init(1000 * 1000);
     loop {
         while !systick::check_counted() {}
-        gpio.set_low(6);
-        while !systick::check_counted() {}
-        gpio.set_high(6);
+        for c in b"hello\n" {
+            uart.putc(*c);
+        }
     }
-
-
-    loop {}
 }
 

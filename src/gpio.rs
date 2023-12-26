@@ -160,6 +160,13 @@ impl Gpio {
         }
     }
 
+    pub fn set_pin_function(&self, pin: usize, function: usize) {
+        unsafe {
+            // function select
+            self.io_bank0.pins[pin].ctrl.write(function as u32);
+        }
+    }
+
     pub fn set_high(&self, pin: usize) {
         unsafe {
             self.sio.set_gpio_out(pin);
@@ -173,7 +180,7 @@ impl Gpio {
     }
 }
 
-const RESET_BASE: usize = 0x4000_c000;
+pub const RESET_BASE: usize = 0x4000_c000;
 
 #[repr(C)]
 pub struct Reset {
