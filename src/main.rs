@@ -1,26 +1,57 @@
 #![no_std]
 #![no_main]
 
+mod clock;
+mod cs;
 mod gpio;
 mod systick;
-mod cs;
 mod uart;
-mod clock;
 
+use crate::gpio::Gpio;
 use core::panic::PanicInfo;
 use core::ptr;
-//use defmt_rtt as _; // global logger
-//use panic_probe as _;
-use crate::gpio::Gpio;
+#[cfg(feature="probe-run")]
+use defmt_rtt as _; // global logger
+#[cfg(feature="probe-run")]
+use panic_probe as _;
 
 #[link_section = ".boot_loader"]
 #[used]
 pub static BOOT_LOADER: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
 
+#[cfg(feature="probe-run")]
+macro_rules! dprintln {
+    () => {
+        defmt::println!()
+    };
+    ($s:expr) => {
+        defmt::println!($s)
+    };
+    ($s:expr, $($tt:tt)*) => {
+        defmt::println!($s, $($tt)*)
+    };
+}
+
+#[cfg(not(feature="probe-run"))]
+macro_rules! dprintln {
+    () => {};
+    ($s:expr) => {};
+    ($s:expr, $($tt:tt)*) => {};
+}
+
+#[cfg(not(feature="probe-run"))]
 #[panic_handler]
 fn panic(_: &PanicInfo) -> ! {
     loop {}
 }
+
+#[cfg(feature="probe-run")]
+#[defmt::panic_handler]
+fn panic() -> ! {
+    loop {}
+}
+
+
 
 pub union Vector {
     reserved: u32,
@@ -45,7 +76,9 @@ pub static EXCEPTIONS: [Vector; 14] = [
     Vector { handler: HardFault },
     Vector { handler: MemManage },
     Vector { handler: BusFault },
-    Vector { handler: UsageFault },
+    Vector {
+        handler: UsageFault,
+    },
     Vector { reserved: 0 },
     Vector { reserved: 0 },
     Vector { reserved: 0 },
@@ -88,7 +121,6 @@ pub unsafe extern "C" fn Reset() -> ! {
     let count = edata as usize - sdata as usize;
     ptr::copy_nonoverlapping(sidata, sdata, count);
 
-
     my_main()
 }
 
@@ -98,7 +130,7 @@ pub fn my_main() -> ! {
     gpio.set_output_enable(6);
     gpio.set_high(6);
 
-    //defmt::println!("hello");
+    dprintln!("hello");
     let xosc = clock::Xosc::new();
     let uart = uart::Uart0::new();
     uart.init(&xosc, &gpio);
@@ -111,4 +143,3 @@ pub fn my_main() -> ! {
         }
     }
 }
-

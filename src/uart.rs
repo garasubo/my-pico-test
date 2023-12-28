@@ -1,7 +1,7 @@
-use core::ops::Deref;
-use volatile_register::{RO, RW};
 use crate::clock::{Clock, Xosc};
 use crate::gpio::{Gpio, Reset, RESET_BASE};
+use core::ops::Deref;
+use volatile_register::{RO, RW};
 
 const UART0_BASE: usize = 0x4003_4000;
 
@@ -49,7 +49,9 @@ impl Uart0 {
         // Uart reset
         let reset = unsafe { &mut *(RESET_BASE as *mut Reset) };
         // Bit 22: UART0
-        unsafe { reset.reset.modify(|r| r & !(1 << 22)); }
+        unsafe {
+            reset.reset.modify(|r| r & !(1 << 22));
+        }
         while reset.reset_done.read() & (1 << 22) == 0 {}
 
         unsafe {
@@ -74,8 +76,6 @@ impl Uart0 {
     pub fn getc(&self) -> u8 {
         // check if receive FIFO is empty
         while self.fr.read() & (1 << 4) != 0 {}
-        unsafe {
-            self.dr.read() as u8
-        }
+        unsafe { self.dr.read() as u8 }
     }
 }

@@ -115,7 +115,6 @@ impl Deref for PadsBank0 {
     }
 }
 
-
 pub struct Gpio {
     sio: Sio,
     io_bank0: IoBank0,
@@ -137,10 +136,14 @@ impl Gpio {
     pub fn wait_gpio_reset_done(&self) {
         let reset = unsafe { &mut *(RESET_BASE as *mut Reset) };
         // Bit 5: IO_BANK0
-        unsafe { reset.reset.modify(|r| r & !(1 << 5)); }
+        unsafe {
+            reset.reset.modify(|r| r & !(1 << 5));
+        }
         while reset.reset_done.read() & (1 << 5) == 0 {}
         // Bit 8: PADS_BANK0
-        unsafe { reset.reset.modify(|r| r & !(1 << 8)); }
+        unsafe {
+            reset.reset.modify(|r| r & !(1 << 8));
+        }
         while reset.reset_done.read() & (1 << 8) == 0 {}
     }
 

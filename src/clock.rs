@@ -63,7 +63,6 @@ impl Deref for Xosc {
     }
 }
 
-
 impl Xosc {
     pub fn new() -> Self {
         Self {}

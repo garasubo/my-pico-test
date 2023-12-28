@@ -8,7 +8,11 @@ edition = "2021"
 [dependencies]
 rp2040-boot2 = "0.3.0"
 volatile-register = "0.2.2"
-defmt = "0.3"
-defmt-rtt = "0.4"
-panic-probe = { version = "0.3", features = ["print-defmt"] }
+defmt = { version = "0.3", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
+panic-probe = { version = "0.3", features = ["print-defmt"], optional = true }
 critical-section = { version = "1.1", features = ["restore-state-bool"] }
+
+[features]
+default = []
+probe-run = ["defmt", "defmt-rtt", "panic-probe"]
