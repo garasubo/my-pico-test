@@ -1,61 +1,6 @@
 use core::ops::Deref;
-use volatile_register::{RO, RW, WO};
-
-const SIO_BASE: usize = 0xd000_0000;
-
-#[repr(C)]
-struct SioRegisters {
-    cpuid: RO<u32>,
-    gpio_in: RO<u32>,
-    gpio_hi_in: RO<u32>,
-    _reserved0: u32,
-    // 0x10
-    gpio_out: RW<u32>,
-    gpio_out_set: WO<u32>,
-    gpio_out_clr: WO<u32>,
-    gpio_out_xor: WO<u32>,
-    gpio_oe: RW<u32>,
-    gpio_oe_set: WO<u32>,
-    gpio_oe_clr: WO<u32>,
-    gpio_oe_xor: WO<u32>,
-    // TBD
-}
-
-impl SioRegisters {
-    fn clear_gpio_out(&self, pin: usize) {
-        unsafe {
-            self.gpio_out_clr.write(0x1 << pin);
-        }
-    }
-
-    fn clear_gpio_oe(&self, pin: usize) {
-        unsafe {
-            self.gpio_oe_clr.write(0x1 << pin);
-        }
-    }
-
-    fn set_gpio_oe(&self, pin: usize) {
-        unsafe {
-            self.gpio_oe_set.write(0x1 << pin);
-        }
-    }
-
-    fn set_gpio_out(&self, pin: usize) {
-        unsafe {
-            self.gpio_out_set.write(0x1 << pin);
-        }
-    }
-}
-
-struct Sio;
-
-impl Deref for Sio {
-    type Target = SioRegisters;
-
-    fn deref(&self) -> &Self::Target {
-        unsafe { &*(SIO_BASE as *const SioRegisters) }
-    }
-}
+use volatile_register::{RO, RW};
+use crate::sio::Sio;
 
 const IO_BANK0_BASE: usize = 0x4001_4000;
 

@@ -24,6 +24,7 @@ SECTIONS {
     LONG(ORIGIN(RAM) + LENGTH(RAM));
 
     /* Second entry: reset vector */
+    _reset_vector = .;
     KEEP(*(.vector_table.reset_vector));
 
     KEEP(*(.vector_table.exceptions));
