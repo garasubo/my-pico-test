@@ -6,7 +6,7 @@ fn main() {
         .unwrap()
         .write_all(include_bytes!("link.ld"))
         .unwrap();
-    println!("cargo:rusc-link-search={}", out.display());
+    println!("cargo:rustc-link-search={}", out.display());
 
     println!("cargo:rerun-if-changed=link.ld");
 }
